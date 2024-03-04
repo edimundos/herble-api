@@ -1,5 +1,7 @@
 package eu.herble.herbleapi.notifications;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import eu.herble.herbleapi.notifications.data.CancelNotificationRequest;
 import eu.herble.herbleapi.notifications.data.PushNotificationRequest;
 import eu.herble.herbleapi.notifications.data.PushNotificationResponse;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequestMapping(path = "api/notifications")
@@ -23,22 +24,26 @@ public class PushNotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<PushNotificationResponse> sendTokenNotification(@RequestBody PushNotificationRequest request) {
+    public ResponseEntity<PushNotificationResponse> sendTokenNotification(
+            @RequestBody PushNotificationRequest request) {
         if (request.getScheduleTime() != null) {
             pushNotificationService.schedulePushNotification(request);
         } else {
             pushNotificationService.sendPushNotificationToToken(request);
         }
-        return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification scheduled."), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new PushNotificationResponse(HttpStatus.OK.value(), "Notification scheduled."),
+                HttpStatus.OK);
     }
 
     @PostMapping("/cancel")
-    public ResponseEntity<?> cancelNotification(@RequestBody CancelNotificationRequest cancelRequest) {
+    public ResponseEntity<?> cancelNotification(
+            @RequestBody CancelNotificationRequest cancelRequest) {
         boolean isCancelled = pushNotificationService.cancelNotification(cancelRequest.getPlantID());
         if (isCancelled) {
             return ResponseEntity.ok("Notification cancelled successfully");
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Notification not found or already executed");
+            return ResponseEntity.status(NOT_FOUND).body("Notification not found or already executed");
         }
     }
 }

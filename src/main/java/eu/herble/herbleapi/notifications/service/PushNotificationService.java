@@ -1,13 +1,12 @@
 package eu.herble.herbleapi.notifications.service;
 
 import eu.herble.herbleapi.notifications.data.PushNotificationRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -32,8 +31,9 @@ public class PushNotificationService {
     public void schedulePushNotification(PushNotificationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         long delay = ChronoUnit.MILLIS.between(now, request.getScheduleTime());
-        ScheduledFuture<?> future = scheduler.schedule(() ->
-                sendPushNotificationToToken(request), delay, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> future =
+                scheduler.schedule(
+                        () -> sendPushNotificationToToken(request), delay, TimeUnit.MILLISECONDS);
 
         scheduledTasks.put(request.getPlantID(), future);
     }
@@ -47,5 +47,4 @@ public class PushNotificationService {
         }
         return false;
     }
-
 }

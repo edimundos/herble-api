@@ -8,13 +8,12 @@ import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.model.Token;
 import eu.herble.herbleapi.users.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @Slf4j
@@ -29,10 +28,7 @@ public class RegistrationController {
     @PostMapping("/register")
     public String registerUser(@RequestBody UserModel userModel, final HttpServletRequest request) {
         AppUser appUser = userService.registerUser(userModel);
-        publisher.publishEvent(new RegistrationComplete(
-                appUser,
-                applicationUrl(request)
-        ));
+        publisher.publishEvent(new RegistrationComplete(appUser, applicationUrl(request)));
         return "Success";
     }
 
@@ -70,7 +66,7 @@ public class RegistrationController {
     private void resendVerificationTokenMail(AppUser appUser, String applicationUrl, Token verificationToken) {
         String url = applicationUrl + "/verifyRegistration?token=" + verificationToken.getToken();
 
-        //sendVerificationEmail()
+        // sendVerificationEmail()
         log.info("Click the link to verify your account " + url);
     }
 
@@ -119,17 +115,17 @@ public class RegistrationController {
         return "Password Changed Successfully";
     }
 
-
     private String passwordResetTokenMail(AppUser appUser, String applicationUrl, String token) {
         String url = applicationUrl + "/savePassword?token=" + token;
 
-        //sendVerificationEmail()
+        // sendVerificationEmail()
         log.info("Click the link to reset your password " + url);
         return url;
     }
 
     private String applicationUrl(HttpServletRequest request) {
-        log.info("link should be called --- " + "http://" + request.getServerName() + ":" + request.getServerPort()); // this is for localhost, must change later
-        return "http://" + request.getServerName() + ":" + request.getServerPort();
+        String url = "http://" + request.getServerName() + ":" + request.getServerPort();
+        log.info("link should be called --- {}", url); // this is for localhost, must change later
+        return url;
     }
 }

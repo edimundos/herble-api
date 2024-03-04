@@ -1,9 +1,8 @@
 package eu.herble.herbleapi.users.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
+import lombok.Data;
 
 @Data
 @Entity
@@ -11,9 +10,7 @@ public class Token {
     private static final int TTL_IN_MINUTES = 10;
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.AUTO,
-            generator = "native")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -23,7 +20,8 @@ public class Token {
     private LocalDateTime expiresAt;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id",
+    @JoinColumn(
+            name = "user_id",
             nullable = false,
             foreignKey = @ForeignKey(name = "FK_USER_PASSWORD_TOKEN"))
     private AppUser appUser;
@@ -36,7 +34,5 @@ public class Token {
         this.expiresAt = LocalDateTime.now().plusMinutes(TTL_IN_MINUTES);
     }
 
-    public Token() {
-
-    }
+    public Token() {}
 }

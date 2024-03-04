@@ -3,19 +3,18 @@ package eu.herble.herbleapi.users.event.listener;
 import eu.herble.herbleapi.users.event.RegistrationComplete;
 import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.service.UserService;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
 @Component
 @Slf4j
-public class RegistrationCompleteEventListener implements ApplicationListener<RegistrationComplete> {
+public class RegistrationCompleteEventListener
+        implements ApplicationListener<RegistrationComplete> {
 
-    @Autowired
-    private UserService userService;
+    @Autowired private UserService userService;
 
     @Override
     public void onApplicationEvent(RegistrationComplete event) {
@@ -27,7 +26,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
         String url = event.getApplicationUrl() + "/verifyRegistration?token=" + token;
 
-        //sendVerificationEmail()
+        // sendVerificationEmail()
         log.info("Click the link to verify your account " + url);
     }
 }

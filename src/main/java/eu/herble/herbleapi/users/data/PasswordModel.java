@@ -1,6 +1,5 @@
 package eu.herble.herbleapi.users.data;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,5 +13,4 @@ public class PasswordModel {
 
     private String oldPassword;
     private String newPassword;
-
 }

@@ -4,13 +4,12 @@ import com.google.firebase.messaging.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import eu.herble.herbleapi.notifications.data.PushNotificationRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -24,7 +23,11 @@ public class FCMService {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonOutput = gson.toJson(message);
         String response = sendAndGetResponse(message);
-        log.info("Sent message to token. Device token: " + request.getToken() + ", " + response + " msg " + jsonOutput);
+        log.info(
+                "Sent message to token. Device token: {}, {} msg {}",
+                request.getToken(),
+                response,
+                jsonOutput);
     }
 
     private String sendAndGetResponse(Message message) {
@@ -36,32 +39,34 @@ public class FCMService {
         return null;
     }
 
-
     private AndroidConfig getAndroidConfig(String topic) {
         return AndroidConfig.builder()
-                .setTtl(Duration.ofMinutes(ttl).toMillis()).setCollapseKey(topic)
+                .setTtl(Duration.ofMinutes(ttl).toMillis())
+                .setCollapseKey(topic)
                 .setPriority(AndroidConfig.Priority.HIGH)
-                .setNotification(AndroidNotification.builder()
-                        .setTag(topic).build()).build();
+                .setNotification(AndroidNotification.builder().setTag(topic).build())
+                .build();
     }
 
     private ApnsConfig getApnsConfig(String topic) {
         return ApnsConfig.builder()
-                .setAps(Aps.builder().setCategory(topic).setThreadId(topic).build()).build();
+                .setAps(Aps.builder().setCategory(topic).setThreadId(topic).build())
+                .build();
     }
 
     private Message getPreconfiguredMessageToToken(PushNotificationRequest request) {
-        return getPreconfiguredMessageBuilder(request).setToken(request.getToken())
-                .build();
+        return getPreconfiguredMessageBuilder(request).setToken(request.getToken()).build();
     }
 
     private Message getPreconfiguredMessageWithoutData(PushNotificationRequest request) {
-        return getPreconfiguredMessageBuilder(request).setTopic(request.getTopic())
-                .build();
+        return getPreconfiguredMessageBuilder(request).setTopic(request.getTopic()).build();
     }
 
-    private Message getPreconfiguredMessageWithData(Map<String, String> data, PushNotificationRequest request) {
-        return getPreconfiguredMessageBuilder(request).putAllData(data).setToken(request.getToken())
+    private Message getPreconfiguredMessageWithData(
+            Map<String, String> data, PushNotificationRequest request) {
+        return getPreconfiguredMessageBuilder(request)
+                .putAllData(data)
+                .setToken(request.getToken())
                 .build();
     }
 
@@ -74,14 +79,16 @@ public class FCMService {
         data.put("plantID", request.getPlantID());
         data.put("plantName", request.getPlantName());
 
-        Message.Builder messageBuilder = Message.builder()
-                .putAllData(data)
-                .setApnsConfig(apnsConfig)
-                .setAndroidConfig(androidConfig)
-                .setNotification(Notification.builder()
-                        .setTitle(request.getTitle())
-                        .setBody(request.getMessage())
-                        .build());
+        Message.Builder messageBuilder =
+                Message.builder()
+                        .putAllData(data)
+                        .setApnsConfig(apnsConfig)
+                        .setAndroidConfig(androidConfig)
+                        .setNotification(
+                                Notification.builder()
+                                        .setTitle(request.getTitle())
+                                        .setBody(request.getMessage())
+                                        .build());
 
         return messageBuilder;
     }

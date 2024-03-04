@@ -23,6 +23,8 @@ spring:
         format_sql: true
     show-sql: true
 
+management.endpoints.web.exposure.include: prometheus,health,metrics
+
 app:
   firebase-configuration-file: herble-efae7-firebase-adminsdk-r5ptw-491f69e7bc.json
   firebase.android.config.ttl: 2

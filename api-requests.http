@@ -1,0 +1,8 @@
+// @no-log
+GET {{host}}/actuator/health
+Content-Type: application/json
+
+### Hello
+
+GET {{host}}/hello
+Content-Type: application/json

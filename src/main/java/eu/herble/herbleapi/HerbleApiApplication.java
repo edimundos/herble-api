@@ -9,5 +9,4 @@ public class HerbleApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(HerbleApiApplication.class, args);
     }
-
 }
