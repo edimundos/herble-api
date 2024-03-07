@@ -5,14 +5,14 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     username: postgres
-    #    password: testerherble123
-    password: postgres
-    #    url: jdbc:postgresql://localhost:5432/CloudSql
-    url: jdbc:postgresql://localhost:5432/herble
-  #    hikari:
-  #      data-source-properties:
-  #        socketFactory: com.google.cloud.sql.postgres.SocketFactory
-  #        cloudSqlInstance: herble-test-2:us-central1:herble-db-test
+    password: testerherble123
+#    password: postgres
+    url: jdbc:postgresql://localhost:5432/CloudSql
+#    url: jdbc:postgresql://localhost:5432/herble
+    hikari:
+        data-source-properties:
+          socketFactory: com.google.cloud.sql.postgres.SocketFactory
+          cloudSqlInstance: herble-test-2:us-central1:herble-db-test
   jpa:
     hibernate:
       auto_quote_keyword: true
