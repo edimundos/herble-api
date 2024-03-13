@@ -19,7 +19,8 @@ public class WebSecurityConfig {
             "/register",
             "/resendVerifyToken*",
             "/verifyRegistration*",
-            "/login"
+            "/login",
+            "/sendMail"
     };
 
     @Bean

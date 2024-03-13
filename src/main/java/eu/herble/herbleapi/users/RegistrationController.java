@@ -1,11 +1,13 @@
 package eu.herble.herbleapi.users;
 
+import eu.herble.herbleapi.users.data.EmailDetails;
 import eu.herble.herbleapi.users.data.LoginModel;
 import eu.herble.herbleapi.users.data.PasswordModel;
 import eu.herble.herbleapi.users.data.UserModel;
 import eu.herble.herbleapi.users.event.RegistrationComplete;
 import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.model.Token;
+import eu.herble.herbleapi.users.service.EmailService;
 import eu.herble.herbleapi.users.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -25,10 +27,15 @@ public class RegistrationController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/register")
     public String registerUser(@RequestBody UserModel userModel, final HttpServletRequest request) {
         AppUser appUser = userService.registerUser(userModel);
-        publisher.publishEvent(new RegistrationComplete(appUser, applicationUrl(request)));
+        String url=applicationUrl(request);
+        publisher.publishEvent(new RegistrationComplete(appUser, url));
+//        verifyTokenMail(appUser,url,appUser.);
         return "Success";
     }
 
@@ -59,15 +66,19 @@ public class RegistrationController {
     public String resendVerificationToken(@RequestParam("token") String oldToken, HttpServletRequest request) {
         Token verificationToken = userService.generateNewVerificationToken(oldToken);
         AppUser appUser = verificationToken.getAppUser();
-        resendVerificationTokenMail(appUser, applicationUrl((request)), verificationToken);
+        verifyTokenMail(appUser, applicationUrl((request)), verificationToken);
         return "Verification Link Sent";
     }
 
-    private void resendVerificationTokenMail(AppUser appUser, String applicationUrl, Token verificationToken) {
+    private void verifyTokenMail(AppUser appUser, String applicationUrl, Token verificationToken) {
         String url = applicationUrl + "/verifyRegistration?token=" + verificationToken.getToken();
 
-        // sendVerificationEmail()
-        log.info("Click the link to verify your account " + url);
+        String body="Click the link to verify your account " + url+"\n"+
+                "If You received this email without previous notice don't click the link reach out our customer support on www.herble.eu";
+
+        EmailDetails email= new EmailDetails(appUser.getEmail(),body, "Verification link for Herble app", "");
+        String status = emailService.sendSimpleMail(email);
+
     }
 
     @PostMapping("/resetPassword")
@@ -127,5 +138,28 @@ public class RegistrationController {
         String url = "http://" + request.getServerName() + ":" + request.getServerPort();
         log.info("link should be called --- {}", url); // this is for localhost, must change later
         return url;
+    }
+
+
+
+    // Sending a simple Email
+    @PostMapping("/sendMail")
+    public String
+    sendMail(@RequestBody EmailDetails details)
+    {
+
+        String status = emailService.sendSimpleMail(details);
+
+        return status;
+    }
+
+    // Sending email with attachment
+    @PostMapping("/sendMailWithAttachment")
+    public String sendMailWithAttachment(
+            @RequestBody EmailDetails details)
+    {
+        String status
+                = emailService.sendMailWithAttachment(details);
+        return status;
     }
 }
