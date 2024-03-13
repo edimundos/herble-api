@@ -14,6 +14,7 @@ public class AppUser {
 
     private String firstname;
     private String lastName;
+    @Column(unique = true)
     private String email;
 
     @Column(length = 60)
