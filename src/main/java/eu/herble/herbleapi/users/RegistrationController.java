@@ -1,9 +1,9 @@
 package eu.herble.herbleapi.users;
 
+import eu.herble.herbleapi.users.data.ChangePasswordRequest;
 import eu.herble.herbleapi.users.data.EmailDetails;
-import eu.herble.herbleapi.users.data.LoginModel;
-import eu.herble.herbleapi.users.data.PasswordModel;
-import eu.herble.herbleapi.users.data.UserModel;
+import eu.herble.herbleapi.users.data.LoginRequest;
+import eu.herble.herbleapi.users.data.UserRegistrationRequest;
 import eu.herble.herbleapi.users.event.RegistrationComplete;
 import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.model.Token;
@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,27 +20,31 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class RegistrationController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
+
+    public RegistrationController(UserService userService, ApplicationEventPublisher publisher, EmailService emailService) {
+        this.userService = userService;
+        this.publisher = publisher;
+        this.emailService = emailService;
+    }
+
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody UserModel userModel, final HttpServletRequest request) {
-        AppUser appUser = userService.registerUser(userModel);
-        String url=applicationUrl(request);
+    public String registerUser(@RequestBody UserRegistrationRequest userRegistrationRequest, final HttpServletRequest request) {
+        AppUser appUser = userService.registerUser(userRegistrationRequest);
+        String url = applicationUrl(request);
         publisher.publishEvent(new RegistrationComplete(appUser, url));
-//        verifyTokenMail(appUser,url,appUser.);
+
         return "Success";
     }
 
     @PostMapping("/login")
-    public String registerUser(@RequestBody LoginModel loginModel, HttpServletRequest request) {
-        String account = userService.loginUser(loginModel);
+    public String registerUser(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        String account = userService.loginUser(loginRequest);
         if (account.equalsIgnoreCase("valid")) {
             return "Success";
         }
@@ -49,7 +52,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/verifyRegistration")
-    public String verifyRegistration(@RequestParam("token") String token) {
+    public String verifyRegistration(@RequestParam("token") UUID token) {
         String result = userService.validateVerificationToken(token);
         if (result.equalsIgnoreCase("valid")) {
             return "User verified successfully";
@@ -63,7 +66,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/resendVerifyToken")
-    public String resendVerificationToken(@RequestParam("token") String oldToken, HttpServletRequest request) {
+    public String resendVerificationToken(@RequestParam("token") UUID oldToken, HttpServletRequest request) {
         Token verificationToken = userService.generateNewVerificationToken(oldToken);
         AppUser appUser = verificationToken.getAppUser();
         verifyTokenMail(appUser, applicationUrl((request)), verificationToken);
@@ -73,23 +76,23 @@ public class RegistrationController {
     private void verifyTokenMail(AppUser appUser, String applicationUrl, Token verificationToken) {
         String url = applicationUrl + "/verifyRegistration?token=" + verificationToken.getToken();
 
-        String body="Click the link to verify your account " + url+"\n"+
+        String body = "Click the link to verify your account " + url + "\n" +
                 "If You received this email without previous notice don't click the link reach out our customer support on www.herble.eu";
 
-        EmailDetails email= new EmailDetails(appUser.getEmail(),body, "Verification link for Herble app", "");
+        EmailDetails email = new EmailDetails(appUser.getEmail(), body, "Verification link for Herble app", "");
         String status = emailService.sendSimpleMail(email);
 
     }
 
     @PostMapping("/resetPassword")
-    public String resetPassword(@RequestBody PasswordModel passwordModel, HttpServletRequest request) {
+    public String resetPassword(@RequestBody ChangePasswordRequest changePasswordRequest, HttpServletRequest request) {
 
-        AppUser appUser = userService.findUserByEmail(passwordModel.getEmail());
+        AppUser appUser = userService.findUserByEmail(changePasswordRequest.getEmail());
 
         String url = "";
 
         if (appUser != null) {
-            String token = UUID.randomUUID().toString();
+            UUID token = UUID.randomUUID();
             userService.createPasswordResetTokenForUser(appUser, token);
             url = passwordResetTokenMail(appUser, applicationUrl(request), token);
         }
@@ -98,7 +101,8 @@ public class RegistrationController {
     }
 
     @PostMapping("/savePassword")
-    public String savePassword(@RequestParam("token") String token, @RequestBody PasswordModel passwordModel) {
+    public String savePassword(@RequestParam("token") UUID token, @RequestBody ChangePasswordRequest
+            changePasswordRequest) {
 
         String result = userService.validatePasswordResetToken(token);
         if (!result.equalsIgnoreCase("valid")) {
@@ -108,7 +112,7 @@ public class RegistrationController {
         Optional<AppUser> user = userService.getUserByPasswordResetToken(token);
 
         if (user.isPresent()) {
-            userService.changePassword(user.get(), passwordModel.getNewPassword());
+            userService.changePassword(user.get(), changePasswordRequest.getNewPassword());
             return "Password reset successful";
         } else {
             return "invalid Token";
@@ -116,17 +120,17 @@ public class RegistrationController {
     }
 
     @PostMapping("/changePassword")
-    public String changePassword(@RequestBody PasswordModel passwordModel) {
-        AppUser appUser = userService.findUserByEmail(passwordModel.getEmail());
-        if (!userService.checkIfValidOldPassword(appUser, passwordModel.getOldPassword())) {
+    public String changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        AppUser appUser = userService.findUserByEmail(changePasswordRequest.getEmail());
+        if (!userService.checkIfValidOldPassword(appUser, changePasswordRequest.getOldPassword())) {
             return "Invalid Old Password";
         }
 
-        userService.changePassword(appUser, passwordModel.getNewPassword());
+        userService.changePassword(appUser, changePasswordRequest.getNewPassword());
         return "Password Changed Successfully";
     }
 
-    private String passwordResetTokenMail(AppUser appUser, String applicationUrl, String token) {
+    private String passwordResetTokenMail(AppUser appUser, String applicationUrl, UUID token) {
         String url = applicationUrl + "/savePassword?token=" + token;
 
         // sendVerificationEmail()
@@ -135,31 +139,22 @@ public class RegistrationController {
     }
 
     private String applicationUrl(HttpServletRequest request) {
-        String url = "http://" + request.getServerName() + ":" + request.getServerPort();
+        String url = "http://" + request.getRequestURI();
         log.info("link should be called --- {}", url); // this is for localhost, must change later
         return url;
     }
 
-
-
-    // Sending a simple Email
     @PostMapping("/sendMail")
-    public String
-    sendMail(@RequestBody EmailDetails details)
-    {
+    public String sendMail(@RequestBody EmailDetails details) {
 
         String status = emailService.sendSimpleMail(details);
 
         return status;
     }
 
-    // Sending email with attachment
     @PostMapping("/sendMailWithAttachment")
-    public String sendMailWithAttachment(
-            @RequestBody EmailDetails details)
-    {
-        String status
-                = emailService.sendMailWithAttachment(details);
+    public String sendMailWithAttachment(@RequestBody EmailDetails details) {
+        String status = emailService.sendMailWithAttachment(details);
         return status;
     }
 }

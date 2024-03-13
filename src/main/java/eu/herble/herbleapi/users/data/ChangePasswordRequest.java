@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordModel {
+public class ChangePasswordRequest {
 
     private String email;
 

@@ -3,8 +3,8 @@ package eu.herble.herbleapi.users.service;
 import static eu.herble.herbleapi.users.model.TokenType.PASSWORD_RESET;
 import static eu.herble.herbleapi.users.model.TokenType.VERIFICATION;
 
-import eu.herble.herbleapi.users.data.LoginModel;
-import eu.herble.herbleapi.users.data.UserModel;
+import eu.herble.herbleapi.users.data.LoginRequest;
+import eu.herble.herbleapi.users.data.UserRegistrationRequest;
 import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.model.Token;
 import eu.herble.herbleapi.users.repo.TokenRepository;
@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,34 +20,37 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private TokenRepository tokenRepository;
+    private final TokenRepository tokenRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public AppUser registerUser(UserModel userModel) {
+    public UserService(UserRepository userRepository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public AppUser registerUser(UserRegistrationRequest userRegistrationRequest) {
         AppUser appUser = new AppUser();
-        appUser.setEmail(userModel.getEmail());
-        appUser.setFirstname(userModel.getFirstname());
-        appUser.setLastName(userModel.getLastName());
+        appUser.setEmail(userRegistrationRequest.getEmail());
+        appUser.setFirstname(userRegistrationRequest.getFirstname());
+        appUser.setLastName(userRegistrationRequest.getLastName());
         appUser.setRole("USER");
-        appUser.setPassword(passwordEncoder.encode(userModel.getPassword()));
+        appUser.setPassword(passwordEncoder.encode(userRegistrationRequest.getPassword()));
         userRepository.save(appUser);
         return appUser;
     }
 
-    public void saveVerificationTokenForUser(String token, AppUser appUser) {
+    public void saveVerificationTokenForUser(UUID token, AppUser appUser) {
         Token verificationToken = new Token(VERIFICATION, appUser, token);
 
         tokenRepository.save(verificationToken);
         log.info(verificationToken.toString());
     }
 
-    public String validateVerificationToken(String token) {
+    public String validateVerificationToken(UUID token) {
         Token verificationToken = tokenRepository.findByTypeAndToken(VERIFICATION, token);
 
         if (verificationToken == null) {
@@ -67,24 +69,28 @@ public class UserService {
         return "valid";
     }
 
-    public Token generateNewVerificationToken(String oldToken) {
+    public Token generateNewVerificationToken(UUID oldToken) {
         Token verificationToken = tokenRepository.findByTypeAndToken(VERIFICATION, oldToken);
-        verificationToken.setToken(UUID.randomUUID().toString());
+        verificationToken.setToken(UUID.randomUUID());
         tokenRepository.save(verificationToken);
         return verificationToken;
+    }
+
+    public Optional<AppUser> findById(Long id) {
+        return userRepository.findById(id);
     }
 
     public AppUser findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public void createPasswordResetTokenForUser(AppUser appUser, String token) {
+    public void createPasswordResetTokenForUser(AppUser appUser, UUID token) {
         Token passwordResetToken = new Token(PASSWORD_RESET, appUser, token);
 
         tokenRepository.save(passwordResetToken);
     }
 
-    public String validatePasswordResetToken(String token) {
+    public String validatePasswordResetToken(UUID token) {
         Token passwordResetToken = tokenRepository.findByTypeAndToken(PASSWORD_RESET, token);
 
         if (passwordResetToken == null) {
@@ -104,7 +110,7 @@ public class UserService {
         userRepository.save(appUser);
     }
 
-    public Optional<AppUser> getUserByPasswordResetToken(String token) {
+    public Optional<AppUser> getUserByPasswordResetToken(UUID token) {
         return Optional.ofNullable(tokenRepository.findByTypeAndToken(PASSWORD_RESET, token).getAppUser());
     }
 
@@ -112,9 +118,9 @@ public class UserService {
         return passwordEncoder.matches(oldPassword, appUser.getPassword());
     }
 
-    public String loginUser(LoginModel loginModel) {
-        AppUser appUser = findUserByEmail(loginModel.getEmail());
-        String pwd = loginModel.getPassword();
+    public String loginUser(LoginRequest loginRequest) {
+        AppUser appUser = findUserByEmail(loginRequest.getEmail());
+        String pwd = loginRequest.getPassword();
         if (appUser == null) {
             return "Invalid email";
         }

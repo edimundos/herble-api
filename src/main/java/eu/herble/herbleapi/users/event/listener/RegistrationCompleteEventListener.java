@@ -7,26 +7,26 @@ import eu.herble.herbleapi.users.service.EmailService;
 import eu.herble.herbleapi.users.service.UserService;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class RegistrationCompleteEventListener
-        implements ApplicationListener<RegistrationComplete> {
+public class RegistrationCompleteEventListener implements ApplicationListener<RegistrationComplete> {
+    private final UserService userService;
 
-    @Autowired
-    private UserService userService;
+    private final EmailService emailService;
 
-    @Autowired
-    private EmailService emailService;
+    public RegistrationCompleteEventListener(UserService userService, EmailService emailService) {
+        this.userService = userService;
+        this.emailService = emailService;
+    }
 
     @Override
     public void onApplicationEvent(RegistrationComplete event) {
-        // verif token for user with link
+        // verify token for user with link
         AppUser appUser = event.getAppUser();
-        String token = UUID.randomUUID().toString();
+        UUID token = UUID.randomUUID();
         userService.saveVerificationTokenForUser(token, appUser);
         // send mail to user
 
@@ -34,10 +34,10 @@ public class RegistrationCompleteEventListener
 
         // sendVerificationEmail()
 
-        String body="Click the link to verify your account " + url+"\n"+
+        String body = "Click the link to verify your account " + url + "\n" +
                 "If You received this email without previous notice don't click the link reach out our customer support on www.herble.eu";
 
-        EmailDetails email= new EmailDetails(appUser.getEmail(),body, "Verification link for Herble app", "");
+        EmailDetails email = new EmailDetails(appUser.getEmail(), body, "Verification link for Herble app", "");
         String status = emailService.sendSimpleMail(email);
 
         log.info(status);

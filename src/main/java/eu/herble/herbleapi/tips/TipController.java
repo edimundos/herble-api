@@ -3,13 +3,13 @@ package eu.herble.herbleapi.tips;
 import eu.herble.herbleapi.tips.data.TipsModel;
 import eu.herble.herbleapi.tips.model.Tip;
 import eu.herble.herbleapi.tips.service.TipService;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j

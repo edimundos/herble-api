@@ -2,9 +2,11 @@ package eu.herble.herbleapi.users.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Data;
 
 @Data
+@Table(name = "tokens")
 @Entity
 public class Token {
     private static final int TTL_IN_MINUTES = 10;
@@ -16,7 +18,7 @@ public class Token {
     @Enumerated(EnumType.STRING)
     private TokenType type;
 
-    private String token;
+    private UUID token;
     private LocalDateTime expiresAt;
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -26,7 +28,7 @@ public class Token {
             foreignKey = @ForeignKey(name = "FK_USER_PASSWORD_TOKEN"))
     private AppUser appUser;
 
-    public Token(TokenType type, AppUser appUser, String token) {
+    public Token(TokenType type, AppUser appUser, UUID token) {
         super();
         this.type = type;
         this.appUser = appUser;

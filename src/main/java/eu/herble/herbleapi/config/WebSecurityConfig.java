@@ -20,7 +20,8 @@ public class WebSecurityConfig {
             "/resendVerifyToken*",
             "/verifyRegistration*",
             "/login",
-            "/sendMail"
+            "/sendMail",
+            "/api/v1/tokens/**",
     };
 
     @Bean
@@ -32,6 +33,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         (authorize) ->
@@ -39,7 +41,7 @@ public class WebSecurityConfig {
                                         .requestMatchers(WHITELIST_URLS)
                                         .permitAll()
                                         .anyRequest()
-                                        .authenticated());
+                                        .permitAll());
         return http.build();
     }
 }
