@@ -1,10 +1,9 @@
 package eu.herble.herbleapi.notifications.data;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -18,4 +17,3 @@ public class PushNotificationRequest {
     private String plantID;
     private String plantName;
 }
-

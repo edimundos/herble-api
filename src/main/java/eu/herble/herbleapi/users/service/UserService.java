@@ -1,5 +1,7 @@
 package eu.herble.herbleapi.users.service;
 
+import static eu.herble.herbleapi.users.model.TokenType.PASSWORD_RESET;
+import static eu.herble.herbleapi.users.model.TokenType.VERIFICATION;
 
 import eu.herble.herbleapi.users.data.LoginModel;
 import eu.herble.herbleapi.users.data.UserModel;
@@ -7,17 +9,13 @@ import eu.herble.herbleapi.users.model.AppUser;
 import eu.herble.herbleapi.users.model.Token;
 import eu.herble.herbleapi.users.repo.TokenRepository;
 import eu.herble.herbleapi.users.repo.UserRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import static eu.herble.herbleapi.users.model.TokenType.PASSWORD_RESET;
-import static eu.herble.herbleapi.users.model.TokenType.VERIFICATION;
 
 @Service
 @Slf4j
@@ -74,7 +72,6 @@ public class UserService {
         verificationToken.setToken(UUID.randomUUID().toString());
         tokenRepository.save(verificationToken);
         return verificationToken;
-
     }
 
     public AppUser findUserByEmail(String email) {
@@ -85,7 +82,6 @@ public class UserService {
         Token passwordResetToken = new Token(PASSWORD_RESET, appUser, token);
 
         tokenRepository.save(passwordResetToken);
-
     }
 
     public String validatePasswordResetToken(String token) {
