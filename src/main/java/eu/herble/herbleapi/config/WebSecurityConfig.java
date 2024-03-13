@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                                         .requestMatchers(WHITELIST_URLS)
                                         .permitAll()
                                         .anyRequest()
-                                        .permitAll());
+                                        .authenticated());
         return http.build();
     }
 }
