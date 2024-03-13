@@ -1,5 +1,5 @@
 server:
-  port: 8060
+  port: ${PORT:8080}
 
 spring:
   datasource:
@@ -7,12 +7,13 @@ spring:
     username: postgres
     password: testerherble123
 #    password: postgres
-    url: jdbc:postgresql://localhost:5432/CloudSql
+    url: jdbc:postgresql://localhost:5432/
+#    url: jdbc:postgresql:///postgres
 #    url: jdbc:postgresql://localhost:5432/herble
     hikari:
         data-source-properties:
           socketFactory: com.google.cloud.sql.postgres.SocketFactory
-          cloudSqlInstance: herble-test-2:us-central1:herble-db-test
+          cloudSqlInstance: herble-test-2:europe-west1:herble-test-3
   jpa:
     hibernate:
       auto_quote_keyword: true
@@ -23,11 +24,24 @@ spring:
         format_sql: true
     show-sql: true
 
+  mail:
+      host: smtp.gmail.com
+      port: 587
+      username: testerherble@gmail.com
+      password: tpxooriicpzefuyh
+      properties:
+          mail:
+              smtp:
+                auth: true
+                starttls:
+                    enable: true
+
 management.endpoints.web.exposure.include: prometheus,health,metrics
 
 app:
   firebase-configuration-file: herble-efae7-firebase-adminsdk-r5ptw-491f69e7bc.json
   firebase.android.config.ttl: 2
+
 
 
 
