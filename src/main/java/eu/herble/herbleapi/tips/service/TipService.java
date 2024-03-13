@@ -3,11 +3,10 @@ package eu.herble.herbleapi.tips.service;
 import eu.herble.herbleapi.tips.data.TipsModel;
 import eu.herble.herbleapi.tips.model.Tip;
 import eu.herble.herbleapi.tips.repo.TipRepository;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Slf4j

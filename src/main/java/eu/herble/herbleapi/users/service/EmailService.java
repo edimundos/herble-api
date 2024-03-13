@@ -1,11 +1,9 @@
 package eu.herble.herbleapi.users.service;
 
 
-import java.io.File;
-import javax.mail.MessagingException;
-
 import eu.herble.herbleapi.users.data.EmailDetails;
 import jakarta.mail.internet.MimeMessage;
+import java.io.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
