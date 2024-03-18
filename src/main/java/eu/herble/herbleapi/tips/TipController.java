@@ -31,21 +31,21 @@ public class TipController {
         return new ResponseEntity<>(savedTip, HttpStatus.CREATED);
     }
 
-    @PostMapping
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please select a file to upload.");
-        }
-
-        try {
-            // Here, implement your logic to handle the file. For example, saving it to disk or a database.
-            String fileName = file.getOriginalFilename();
-            // Save the file...
-
-            return ResponseEntity.ok("You successfully uploaded " + fileName + "!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not upload the file: " + file.getOriginalFilename() + "!");
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+//        if (file.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please select a file to upload.");
+//        }
+//
+//        try {
+//            // Here, implement your logic to handle the file. For example, saving it to disk or a database.
+//            String fileName = file.getOriginalFilename();
+//            // Save the file...
+//
+//            return ResponseEntity.ok("You successfully uploaded " + fileName + "!");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Could not upload the file: " + file.getOriginalFilename() + "!");
+//        }
+//    }
 
 }
